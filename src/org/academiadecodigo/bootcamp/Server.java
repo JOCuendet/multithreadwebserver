@@ -17,14 +17,15 @@ public class Server {
             e.printStackTrace();
         }
 
-        while (true) {
-            try {
+        Socket clientSocket;
+        /**
+         * creates a clientSocket ready to receive a new connection
+         * and waits the connection before continue the code.
+         */
+        try {
 
-                /**
-                 * creates a clientSocket ready to receive a new connection
-                 * and waits the connection before continue the code.
-                 */
-                Socket clientSocket = serverSocket.accept();
+            while ((clientSocket = serverSocket.accept()) != null) {
+
 
                 /**
                  * Creates a new Thread to each connection to allow a multi-user system.
@@ -34,11 +35,12 @@ public class Server {
                 /**
                  * Starts the new thread.
                  */
+                System.out.println("new client logged In");
                 clientThread.start();
 
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
