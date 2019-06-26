@@ -5,30 +5,40 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server {
-    private int portNumber;
     private ServerSocket serverSocket;
 
     public void start(int portNumber) {
-        this.portNumber = portNumber;
-
         try {
+            /**
+             * Creates the server Socket.
+             */
             serverSocket = new ServerSocket(portNumber);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-
-        while(true){
-
+        while (true) {
             try {
+
+                /**
+                 * creates a clientSocket ready to receive a new connection
+                 * and waits the connection before continue the code.
+                 */
                 Socket clientSocket = serverSocket.accept();
+
+                /**
+                 * Creates a new Thread to each connection to allow a multi-user system.
+                 */
                 Thread clientThread = new Thread(new clientHandler(clientSocket));
+
+                /**
+                 * Starts the new thread.
+                 */
                 clientThread.start();
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
     }
 }

@@ -1,25 +1,19 @@
 package org.academiadecodigo.bootcamp;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.StringTokenizer;
-
 public class HttpHelper {
 
-    public static void reply(DataOutputStream out, String response) throws IOException {
-        out.writeBytes(response);
-    }
 
-    public static String getFilePath(String filepath){
-        StringTokenizer stringTokenizer = new StringTokenizer(filepath);
-
-        stringTokenizer.nextToken();
-
-        filepath = stringTokenizer.nextToken().toLowerCase();
+    /**
+     * Gets the filepath part of the header string sent from the browser
+     * @param filepath resource file path
+     * @return the resource filepath request
+     */
+    public static String getFilePath(String filepath) {
+       if(filepath != null){
+           String[] spittedFilename = filepath.split(" ");
+           filepath = spittedFilename[1];
+       }
 
         return filepath;
     }
-
-
 }
