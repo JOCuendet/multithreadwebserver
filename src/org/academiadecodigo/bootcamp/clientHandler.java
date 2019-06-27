@@ -106,6 +106,9 @@ public class clientHandler implements Runnable {
         return false;
     }
 
+    private String fallBackPath(){
+        return  "./fallback/";
+    }
     /**
      * Creates an 404 error HTTP response header code with the associated file.
      * File MUST exist.
@@ -114,6 +117,9 @@ public class clientHandler implements Runnable {
     private void send404NotFound() throws IOException {
         File notFound = new File("./www/404.html");
 
+        if (!notFound.exists()){
+            notFound = new File(fallBackPath()+"404.html");
+        }
         if (notFound.exists()) {
             out.writeBytes("HTTP/1.0 404 Not Found\r\n");
             out.writeBytes("Content-Type: text/html; charset=UTF-8\r\n");
@@ -125,6 +131,10 @@ public class clientHandler implements Runnable {
 
     private void sendNotHandled() throws IOException {
         File notImplemented = new File("./www/501.html");
+
+        if (!notImplemented.exists()){
+            notImplemented = new File(fallBackPath() + "501.html");
+        }
 
         if (notImplemented.exists()) {
             out.writeBytes("HTTP/1.0 501 Not Implemented\r\n");
