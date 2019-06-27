@@ -27,12 +27,21 @@ public class clientHandler implements Runnable {
             this.out = new DataOutputStream(clientSocket.getOutputStream());
             this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-            String filepath = HttpHelper.getFilePath(in.readLine());
+            String header = in.readLine();
+
+            String verb = HttpHelper.getVerb(header);
+
+            String filepath = HttpHelper.getFilePath(header);
 
             if(filepath != null)
             {
-                get(filepath);
+                if(verb.equals("GET")){
+                    get(filepath);
+                }else{
+                    sendNotHandled();
+                }
             }
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -111,6 +120,18 @@ public class clientHandler implements Runnable {
             out.writeBytes("Content-Length: " + notFound.length() + " \r\n");
             out.writeBytes("\r\n");
             out.write(convertFileTobyteArray(notFound));
+        }
+    }
+
+    private void sendNotHandled() throws IOException {
+        File notImplemented = new File("./www/501.html");
+
+        if (notImplemented.exists()) {
+            out.writeBytes("HTTP/1.0 501 Not Implemented\r\n");
+            out.writeBytes("Content-Type: text/html; charset=UTF-8\r\n");
+            out.writeBytes("Content-Length: " + notImplemented.length() + " \r\n");
+            out.writeBytes("\r\n");
+            out.write(convertFileTobyteArray(notImplemented));
         }
     }
 
