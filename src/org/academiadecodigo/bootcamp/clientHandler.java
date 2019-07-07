@@ -10,7 +10,7 @@ public class clientHandler implements Runnable {
     private DataOutputStream out;
     private BufferedReader in;
 
-    public clientHandler(Socket clientSocket) {
+    clientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
     }
 
@@ -19,29 +19,31 @@ public class clientHandler implements Runnable {
      * Opens a two-way connection between the serverSocket and the clientSocket
      * returns the filepath of the resource requested
      * invokes the get(); method.
+     *
      * @see private void get
      */
     @Override
     public void run() {
+        System.out.println("new request received.");
         try {
             this.out = new DataOutputStream(clientSocket.getOutputStream());
             this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-            String header = in.readLine();
+            String header;
+            if ((header = in.readLine()) != null) {
 
-            String verb = HttpHelper.getVerb(header);
+                String verb = HttpHelper.getVerb(header);
 
-            String filepath = HttpHelper.getFilePath(header);
+                String filepath = HttpHelper.getFilePath(header);
 
-            if(filepath != null)
-            {
-                if(verb.equals("GET")){
-                    get(filepath);
-                }else{
-                    sendNotHandled();
+                if (filepath != null) {
+                    if (verb.equals("GET")) {
+                        get(filepath);
+                    } else {
+                        sendNotHandled();
+                    }
                 }
             }
-
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -53,8 +55,9 @@ public class clientHandler implements Runnable {
     /**
      * Gets the resource from the server
      * if / returns index.html
-     * @param filepath
-     * @throws IOException
+     *
+     * @param filepath path to file
+     * @throws IOException can throw if file not found
      */
     private void get(String filepath) throws IOException {
         if (filepath.endsWith("/")) {
@@ -67,8 +70,9 @@ public class clientHandler implements Runnable {
 
     /**
      * Creates the header response based on the get() resource path result.
-     * @param filename
-     * @throws IOException
+     *
+     * @param filename the file name.
+     * @throws IOException can throw if file not found.
      */
     private void createAndSendResponseHeader(String filename) throws IOException {
 
@@ -87,11 +91,12 @@ public class clientHandler implements Runnable {
     /**
      * checks if file exists
      * if not, sends a 404 not found method.
+     *
+     * @param filename name of file
+     * @return returns true or false if the file is found.
      * @see private void send404NotFound
-     * @param filename
-     * @return
      */
-    public boolean notFoundReturns404(String filename) {
+    private boolean notFoundReturns404(String filename) {
 
         File file = new File("www/" + filename);
         if (file.exists()) {
@@ -106,19 +111,21 @@ public class clientHandler implements Runnable {
         return false;
     }
 
-    private String fallBackPath(){
-        return  "./fallback/";
+    private String fallBackPath() {
+        return "./fallback/";
     }
+
     /**
      * Creates an 404 error HTTP response header code with the associated file.
      * File MUST exist.
-     * @throws IOException
+     *
+     * @throws IOException if the stream is not open or not present.
      */
     private void send404NotFound() throws IOException {
         File notFound = new File("./www/404.html");
 
-        if (!notFound.exists()){
-            notFound = new File(fallBackPath()+"404.html");
+        if (!notFound.exists()) {
+            notFound = new File(fallBackPath() + "404.html");
         }
         if (notFound.exists()) {
             out.writeBytes("HTTP/1.0 404 Not Found\r\n");
@@ -132,7 +139,7 @@ public class clientHandler implements Runnable {
     private void sendNotHandled() throws IOException {
         File notImplemented = new File("./www/501.html");
 
-        if (!notImplemented.exists()){
+        if (!notImplemented.exists()) {
             notImplemented = new File(fallBackPath() + "501.html");
         }
 
@@ -148,9 +155,9 @@ public class clientHandler implements Runnable {
     /**
      * Creates new Stream from file
      *
-     * @param file
-     * @return
-     * @throws IOException
+     * @param file file object that represents the file to respond
+     * @return returns a byteArray to the stream to send with the HTTPheader
+     * @throws IOException on stream
      */
     private byte[] convertFileTobyteArray(File file) throws IOException {
 
@@ -167,6 +174,7 @@ public class clientHandler implements Runnable {
 
     /**
      * Closes all open connections using
+     *
      * @see private void close()
      */
     private void closeAll() {
@@ -177,7 +185,8 @@ public class clientHandler implements Runnable {
 
     /**
      * closes all "Closeable Objects passed as @param
-     * @param closeable
+     *
+     * @param closeable every object with a closeable behavior
      */
     private void close(Closeable closeable) {
         try {

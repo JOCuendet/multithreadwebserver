@@ -2,45 +2,47 @@ package org.academiadecodigo.bootcamp;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class Server {
+public class Server implements Executor {
     private ServerSocket serverSocket;
+    private ExecutorService fixedPool;
 
-    public void start(int portNumber) {
+
+    public Server(){
+        this.fixedPool = Executors.newFixedThreadPool(50);
+    }
+
+
+    void start(int portNumber) {
         try {
-            /**
-             * Creates the server Socket.
-             */
-            serverSocket = new ServerSocket(portNumber);
+
+            serverSocket = new ServerSocket(portNumber); // creates the server socket
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        Socket clientSocket;
-        /**
-         * creates a clientSocket ready to receive a new connection
-         * and waits the connection before continue the code.
-         */
+
         try {
+            System.out.println("HTTP server handler started.");
+            while (!serverSocket.isClosed()) {
 
-            while ((clientSocket = serverSocket.accept()) != null) {
 
-
-                /**
-                 * Creates a new Thread to each connection to allow a multi-user system.
-                 */
-                Thread clientThread = new Thread(new clientHandler(clientSocket));
-
-                /**
-                 * Starts the new thread.
-                 */
-                System.out.println("new client logged In");
-                clientThread.start();
-
+                execute(new clientHandler(serverSocket.accept())); // send the request to a new thread in the pool
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        fixedPool.shutdown();
+    }
+
+    @Override
+    public void execute(Runnable clientHandler) {
+
+        fixedPool.submit(clientHandler);
+
     }
 }
